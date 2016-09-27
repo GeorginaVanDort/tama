@@ -70,12 +70,14 @@ public class Person {
        String sqlFire = "SELECT * FROM monsters where personId=:id and type = 'fire'";
        List<FireMonster> fireMonsters = con.createQuery(sqlFire)
          .addParameter("id", this.id)
+         .throwOnMappingFailure(false)
          .executeAndFetch(FireMonster.class);
          allMonsters.addAll(fireMonsters);
 
        String sqlWater = "select * from monsters where personId = :id and type = 'water'";
        List<WaterMonster> waterMonsters = con.createQuery(sqlWater)
          .addParameter("id", this.id)
+         .throwOnMappingFailure(false)
          .executeAndFetch(WaterMonster.class);
          allMonsters.addAll(waterMonsters);
      }
