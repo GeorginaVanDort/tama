@@ -63,12 +63,23 @@ public class Person {
    }
  }
 
-   public List<Monster> getMonsters() {
+   public List<Object> getMonsters() {
+     List<Object> allMonsters = new ArrayList<Object>();
+
      try(Connection con = DB.sql2o.open()) {
-       String sql = "SELECT * FROM monsters where personId=:id";
-       return con.createQuery(sql)
+       String sqlFire = "SELECT * FROM monsters where personId=:id and type = 'fire'";
+       List<FireMonster> fireMonsters = con.createQuery(sqlFire)
          .addParameter("id", this.id)
-         .executeAndFetch(Monster.class);
+         .executeAndFetch(FireMonster.class);
+         allMonsters.addAll(fireMonsters);
+
+       String sqlWater = "select * from monsters where personId = :id and type = 'water'";
+       List<WaterMonster> waterMonsters = con.createQuery(sqlWater)
+         .addParameter("id", this.id)
+         .executeAndFetch(WaterMonster.class);
+         allMonsters.addAll(waterMonsters);
      }
+
+     return allMonsters;
    }
 }

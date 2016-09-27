@@ -2,32 +2,29 @@ import org.sql2o.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.sql.Timestamp;
+import java.util.Timer;
+import java.util.TimerTask;
 
-public class Monster {
+public abstract class Monster {
 
-  private String name;
-  private int personId;
-  private int id;
-  private int foodLevel;
-  private int sleepLevel;
-  private int playLevel;
-  private Timestamp birthday;
-  private Timestamp lastSlept;
-  private Timestamp lastAte;
-  private Timestamp lastPlayed;
+  public String name;
+  public int personId;
+  public int id;
+  public int foodLevel;
+  public int sleepLevel;
+  public int playLevel;
+  public Timestamp birthday;
+  public Timestamp lastSlept;
+  public Timestamp lastAte;
+  public Timestamp lastPlayed;
+  public Timer timer;
+  public String type;
 
   public static final int MAX_FOOD_LEVEL = 3;
   public static final int MAX_SLEEP_LEVEL = 8;
   public static final int MAX_PLAY_LEVEL = 12;
   public static final int MIN_ALL_LEVELS = 0;
 
-  public Monster(String name, int personId) {
-    this.name = name;
-    this.personId = personId;
-    playLevel = MAX_PLAY_LEVEL / 2;
-    sleepLevel = MAX_SLEEP_LEVEL / 2;
-    foodLevel = MAX_FOOD_LEVEL / 2;
-  }
 
   public String getName(){
     return name;
@@ -136,30 +133,28 @@ public class Monster {
 
   public void save() {
     try(Connection con = DB.sql2o.open()) {
-      String sql = "INSERT INTO monsters (name, personId, birthday) VALUES (:name, :personId, now())";
-      this.id = (int) con.createQuery(sql, true)
+       String sql = "INSERT INTO monsters (name, personId, birthday, type) VALUES (:name, :personId, now(), :type)";
+        this.id = (int) con.createQuery(sql, true)
         .addParameter("name", this.name)
         .addParameter("personId", this.personId)
+        .addParameter("type", this.type)
         .executeUpdate()
         .getKey();
     }
   }
 
-  public static List<Monster> all() {
-    String sql = "SELECT * FROM monsters;";
-    try(Connection con = DB.sql2o.open()) {
-      return con.createQuery(sql).executeAndFetch(Monster.class);
-    }
-  }
-
-  public static Monster find(int id) {
-    try(Connection con = DB.sql2o.open()) {
-      String sql = "SELECT * FROM monsters where id=:id";
-      Monster monster = con.createQuery(sql)
-        .addParameter("id", id)
-        .executeAndFetchFirst(Monster.class);
-      return monster;
-    }
-  }
+  public void startTimer() {
+    Monster currentMonster = this;//define monster outside of timerTask(inside "this" would refer to timerTask)
+    TimerTask timerTask = new TimerTask(){
+      @Override//so that running the Timer calls our methods
+      public void run() {
+        if(currentMonster.isAlive() == false) {
+          cancel();
+        }
+        depleteLevels();
+      }
+    };
+    this.timer.schedule(timerTask, 0, 600);//timer attached to this Monster
+  }//repeats every 600 milliseconds
 
 }

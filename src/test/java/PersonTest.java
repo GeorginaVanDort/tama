@@ -73,9 +73,9 @@ public class PersonTest {
   public void getMonsters_retrievesAllMonstersFromDatabase_monstersList() {
     Person testPerson = fred;
     testPerson.save();
-    Monster firstMonster = new Monster("Squeaky", testPerson.getId());
+    FireMonster firstMonster = new FireMonster("Squeaky", testPerson.getId());
     firstMonster.save();
-    Monster secondMonster = new Monster("Spud", testPerson.getId());
+    WaterMonster secondMonster = new WaterMonster("Spud", testPerson.getId());
     secondMonster.save();
     Monster[] monsters = new Monster[] { firstMonster, secondMonster };
     assertTrue(testPerson.getMonsters().containsAll(Arrays.asList(monsters)));
